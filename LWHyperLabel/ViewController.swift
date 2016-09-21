@@ -17,21 +17,21 @@ class ViewController: UIViewController {
         
         
         // 设置超链接颜色（默认为蓝色）
-        linkLabel.tintColor = UIColor.purpleColor()
+        linkLabel.tintColor = UIColor.purple
         
         // 设置超链接的选中背景颜色（默认浅白色）
-        linkLabel.selectedLinkBgColor = UIColor.whiteColor().colorWithAlphaComponent(0.95)
+        linkLabel.selectedLinkBgColor = UIColor.white.withAlphaComponent(0.95)
         
         // 是否自动检测超链接（默认开启）
         linkLabel.autoLinkDetectionEnabled = true
         
         // 设置检测的超链接类型（默认全部开启）
         linkLabel.linkDetectionTypes = [
-            LWHyperLabelType.UserHandle,
-            LWHyperLabelType.Hashtag,
-            LWHyperLabelType.URL,
-            LWHyperLabelType.Phone,
-            LWHyperLabelType.Address]
+            LWHyperLabelType.userHandle,
+            LWHyperLabelType.hashtag,
+            LWHyperLabelType.url,
+            LWHyperLabelType.phone,
+            LWHyperLabelType.address]
         
         // 设置屏蔽的关键字
         linkLabel.ignoredKeywords = NSSet(array: ["@llw订单"])

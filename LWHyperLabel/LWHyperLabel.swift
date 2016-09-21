@@ -19,11 +19,11 @@ import UIKit
  - Address:    地址
  */
 @objc enum LWHyperLabelType: Int {
-    case UserHandle     = 1
-    case Hashtag        = 2
-    case URL            = 3
-    case Phone          = 4
-    case Address        = 5
+    case userHandle     = 1
+    case hashtag        = 2
+    case url            = 3
+    case phone          = 4
+    case address        = 5
 }
 
 // keys
@@ -49,11 +49,11 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     
     /**检测超链接的类型组合*/
     internal var linkDetectionTypes = [
-        LWHyperLabelType.UserHandle,
-        LWHyperLabelType.Hashtag,
-        LWHyperLabelType.URL,
-        LWHyperLabelType.Phone,
-        LWHyperLabelType.Address] {
+        LWHyperLabelType.userHandle,
+        LWHyperLabelType.hashtag,
+        LWHyperLabelType.url,
+        LWHyperLabelType.phone,
+        LWHyperLabelType.address] {
         
         didSet {
             // Make sure the text is updated properly
@@ -62,16 +62,11 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     /**忽略的超链接关键字集合*/
-    private var _ignoredKeywords: NSSet?
+    fileprivate var _ignoredKeywords: NSSet?
     internal var ignoredKeywords: NSSet? {
         set {
             if let new = newValue {
-                let set = NSMutableSet(capacity: new.count)
-                new.enumerateObjectsUsingBlock({ (obj: AnyObject, stop: UnsafeMutablePointer<ObjCBool>) -> Void in
-                    set.addObject(obj.lowercaseString)
-                    print(obj.lowercaseString)
-                })
-                _ignoredKeywords = set
+                _ignoredKeywords = new
             } else {
                 self.ignoredKeywords = newValue
             }
@@ -105,19 +100,19 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      ** ****************************************************************************************** **/
     
     /**点击 LWHyperLabelTypeUserHandle 类型回调*/
-    private var userHandleLinkTapHandler: ((label: LWHyperLabel, string: String, range: NSRange) -> Void)?
+    fileprivate var userHandleLinkTapHandler: ((_ label: LWHyperLabel, _ string: String, _ range: NSRange) -> Void)?
     
     /**点击 LWHyperLabelTypeHashtag 类型回调*/
-    private var hashtagLinkTapHandler: ((label: LWHyperLabel, string: String, range: NSRange) -> Void)?
+    fileprivate var hashtagLinkTapHandler: ((_ label: LWHyperLabel, _ string: String, _ range: NSRange) -> Void)?
     
     /**点击 LWHyperLabelTypeURL 类型回调*/
-    private var urlLinkTapHandler: ((label: LWHyperLabel, string: String, range: NSRange) -> Void)?
+    fileprivate var urlLinkTapHandler: ((_ label: LWHyperLabel, _ string: String, _ range: NSRange) -> Void)?
     
     /**点击 LWHyperLabelTypePhone 类型回调*/
-    private var phoneLinkTapHandler: ((label: LWHyperLabel, string: String, range: NSRange) -> Void)?
+    fileprivate var phoneLinkTapHandler: ((_ label: LWHyperLabel, _ string: String, _ range: NSRange) -> Void)?
     
     /**点击 LWHyperLabelTypeAddress 类型回调*/
-    private var addressLinkTapHandler: ((label: LWHyperLabel, string: String, range: NSRange) -> Void)?
+    fileprivate var addressLinkTapHandler: ((_ label: LWHyperLabel, _ string: String, _ range: NSRange) -> Void)?
     
     
     /** ****************************************************************************************** **
@@ -125,19 +120,19 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      ** ****************************************************************************************** **/
     
     // Used to control layout of glyphs and rendering
-    private var layoutManager = NSLayoutManager()
+    fileprivate var layoutManager = NSLayoutManager()
     
     // Specifies the space in which to render text
-    private var textContainer = NSTextContainer()
+    fileprivate var textContainer = NSTextContainer()
     
     // Backing storage for text that is rendered by the layout manager
-    private var textStorage: NSTextStorage?
+    fileprivate var textStorage: NSTextStorage?
     
     // State used to trag if the user has dragged during a touch
-    private var isTouchMoved: Bool = false
+    fileprivate var isTouchMoved: Bool = false
     
     // During a touch, range of text that is displayed as selected
-    private var selectedRange: NSRange = NSMakeRange(0, 0) {
+    fileprivate var selectedRange: NSRange = NSMakeRange(0, 0) {
         didSet {
             // Remove the current selection if the selection is changing
             if oldValue.length > 0 && !NSEqualRanges(oldValue, selectedRange) {
@@ -145,7 +140,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
             }
             
             // Apply the new selection to the text
-            if selectedRange.length > 0 && selectedLinkBgColor != UIColor.clearColor() {
+            if selectedRange.length > 0 && selectedLinkBgColor != UIColor.clear {
                 textStorage?.addAttribute(NSBackgroundColorAttributeName, value: selectedLinkBgColor, range: selectedRange)
             }
             
@@ -154,10 +149,10 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     
-    private var linkTypeAttributes = NSMutableDictionary()
+    fileprivate var linkTypeAttributes = NSMutableDictionary()
     
     // [[kLabelLinkTypeKey : xxx, kLabelRangeKey : xxx, kLabelLinkKey : xxx]]
-    private var linkRanges = [[String : AnyObject]]()
+    fileprivate var linkRanges = [[String : AnyObject]]()
     
     
     /** ****************************************************************************************** **
@@ -208,7 +203,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      
      - returns: 默认的attributes包含了 color 属性
      */
-    private func attributesForLinkType(linkType: LWHyperLabelType.RawValue) -> [String : AnyObject] {
+    fileprivate func attributesForLinkType(_ linkType: LWHyperLabelType.RawValue) -> [String : AnyObject] {
         
         if let attributes = linkTypeAttributes[linkType] as? [String : AnyObject] {
             return attributes
@@ -224,12 +219,12 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      - parameter attributes: attributes属性
      - parameter linkType:   超链接类型
      */
-    private func setAttributes(attributes: [String : AnyObject]?, forLinkType linkType: LWHyperLabelType.RawValue) {
+    fileprivate func setAttributes(_ attributes: [String : AnyObject]?, forLinkType linkType: LWHyperLabelType.RawValue) {
         
         if let attributesDic = attributes {
             linkTypeAttributes[linkType] = attributesDic
         } else {
-            linkTypeAttributes.removeObjectForKey(linkType)
+            linkTypeAttributes.removeObject(forKey: linkType)
         }
         
         // Force refresh
@@ -244,7 +239,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      
      - returns: 超链接字典数据，有可能为nil，keys包括 kLabelLinkTypeKey、kLabelRangeKey、kLabelLinkKey
      */
-    private func linkAtPoint(point: CGPoint) -> [String : AnyObject]? {
+    fileprivate func linkAtPoint(_ point: CGPoint) -> [String : AnyObject]? {
         
         var location = point
         
@@ -264,12 +259,12 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
         location.x -= textOffset.x
         location.y -= textOffset.y
         
-        let touchedChar = layoutManager.glyphIndexForPoint(location, inTextContainer: textContainer)
+        let touchedChar = layoutManager.glyphIndex(for: location, in: textContainer)
         
         // If the touch is in white space after the last glyph on the line we don't count it as a hit on the text
         var lineRange: NSRange = NSMakeRange(0, 0)
-        let lineRect = layoutManager.lineFragmentUsedRectForGlyphAtIndex(touchedChar, effectiveRange: &lineRange)
-        if !CGRectContainsPoint(lineRect, location) {
+        let lineRect = layoutManager.lineFragmentUsedRect(forGlyphAt: touchedChar, effectiveRange: &lineRange)
+        if !lineRect.contains(location) {
             return nil
         }
         
@@ -305,7 +300,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     
     
     // 初始化
-    private func setupTextSystem() {
+    fileprivate func setupTextSystem() {
         
         // Set textContainer up to match our label properties
         textContainer.lineFragmentPadding = 0
@@ -333,7 +328,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     
     
     /**Update our storage from eiter the attributedString or the plain text*/
-    private func updateTextStoreWithText() {
+    fileprivate func updateTextStoreWithText() {
         
         if let attriText = attributedText {
             updateTextStoreWithAttributedString(attriText)
@@ -350,7 +345,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     
     
     /**Update our storage from the attributedString*/
-    private func updateTextStoreWithAttributedString(attributedString: NSAttributedString) {
+    fileprivate func updateTextStoreWithAttributedString(_ attributedString: NSAttributedString) {
         
         var attriText = attributedString
         if attriText.length != 0 {
@@ -386,7 +381,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      Returns attributed string attributes based on the text properties set on the label
      基本普通label.text，创建并返回自定义默认attributedString
      */
-    private func attributesFromProperties() -> [String : AnyObject] {
+    fileprivate func attributesFromProperties() -> [String : AnyObject] {
         
         // Setup shadow attributes
         let shadow = NSShadow()
@@ -400,9 +395,9 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
         
         // Setup color attributes
         var color = textColor
-        if !enabled {
-            color = UIColor.lightGrayColor()
-        } else if highlighted {
+        if !isEnabled {
+            color = UIColor.lightGray
+        } else if isHighlighted {
             color = highlightedTextColor
         }
         
@@ -415,9 +410,9 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
             NSFontAttributeName : font,
             NSForegroundColorAttributeName : color,
             NSShadowAttributeName : shadow,
-            NSParagraphStyleAttributeName : paragraph]
+            NSParagraphStyleAttributeName : paragraph] as [String : Any]
         
-        return attributes
+        return attributes as [String : AnyObject]
     }
     
     
@@ -428,38 +423,38 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      
      - returns: 带有超链接相关描述字典的数组 [[kLabelLinkTypeKey : xxx, kLabelRangeKey : xxx, kLabelLinkKey : xxx]]
      */
-    private func fetchRangeForLinks(text: NSAttributedString) -> [[String : AnyObject]] {
+    fileprivate func fetchRangeForLinks(_ text: NSAttributedString) -> [[String : AnyObject]] {
         
         var rangesForLinks = [[String : AnyObject]]()
         
-        if linkDetectionTypes.contains(LWHyperLabelType.UserHandle) {
+        if linkDetectionTypes.contains(LWHyperLabelType.userHandle) {
             // 以"@"开头的用户名
-            rangesForLinks.appendContentsOf(rangesForUserHandles(text.string))
+            rangesForLinks.append(contentsOf: rangesForUserHandles(text.string))
         }
         
-        if linkDetectionTypes.contains(LWHyperLabelType.Hashtag) {
+        if linkDetectionTypes.contains(LWHyperLabelType.hashtag) {
             // 以"#"开头标签
-            rangesForLinks.appendContentsOf(rangesForHashtags(text.string))
+            rangesForLinks.append(contentsOf: rangesForHashtags(text.string))
         }
         
-        if linkDetectionTypes.contains(LWHyperLabelType.URL) {
+        if linkDetectionTypes.contains(LWHyperLabelType.url) {
             // http链接
             if let attriText = attributedText {
-                rangesForLinks.appendContentsOf(rangesForURLs(attriText))
+                rangesForLinks.append(contentsOf: rangesForURLs(attriText))
             }
         }
         
-        if linkDetectionTypes.contains(LWHyperLabelType.Phone) {
+        if linkDetectionTypes.contains(LWHyperLabelType.phone) {
             // 电哈
             if let attriText = attributedText {
-                rangesForLinks.appendContentsOf(rangesForPhone(attriText))
+                rangesForLinks.append(contentsOf: rangesForPhone(attriText))
             }
         }
         
-        if linkDetectionTypes.contains(LWHyperLabelType.Address) {
+        if linkDetectionTypes.contains(LWHyperLabelType.address) {
             // 地址
             if let attriText = attributedText {
-                rangesForLinks.appendContentsOf(rangesForAddress(attriText))
+                rangesForLinks.append(contentsOf: rangesForAddress(attriText))
             }
         }
         
@@ -474,27 +469,27 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      
      - returns: 带有超链接相关描述字典的数组 [[kLabelLinkTypeKey : xxx, kLabelRangeKey : xxx, kLabelLinkKey : xxx]]
      */
-    private func rangesForUserHandles(textString: String) -> [[String : AnyObject]] {
+    fileprivate func rangesForUserHandles(_ textString: String) -> [[String : AnyObject]] {
         
         var rangesForUserHandles = [[String : AnyObject]]()
         
         do {
             // Setup a regular expression for user handles and hashtags
-            let regex = try NSRegularExpression(pattern: "(?<!\\w)@([\\w\\_]+)?", options: NSRegularExpressionOptions.CaseInsensitive)
+            let regex = try NSRegularExpression(pattern: "(?<!\\w)@([\\w\\_]+)?", options: NSRegularExpression.Options.caseInsensitive)
             
             // Run the expression and get matches
-            let matches = regex.matchesInString(textString, options: NSMatchingOptions.ReportProgress, range: NSMakeRange(0, (textString as NSString).length))
+            let matches = regex.matches(in: textString, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSMakeRange(0, (textString as NSString).length))
             
             // Add all our ranges to the result
             for match in matches {
                 let matchRange = match.range
-                let matchString = (textString as NSString).substringWithRange(matchRange)
+                let matchString = (textString as NSString).substring(with: matchRange)
                 
                 if !ignoreMatch(matchString) {
                     rangesForUserHandles.append([
-                        kLabelLinkTypeKey : LWHyperLabelType.UserHandle.rawValue,
+                        kLabelLinkTypeKey : LWHyperLabelType.userHandle.rawValue as AnyObject,
                         kLabelRangeKey : NSValue(range: matchRange),
-                        kLabelLinkKey : matchString])
+                        kLabelLinkKey : matchString as AnyObject])
                 }
             }
             
@@ -513,27 +508,27 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      
      - returns: 带有超链接相关描述字典的数组 [[kLabelLinkTypeKey : xxx, kLabelRangeKey : xxx, kLabelLinkKey : xxx]]
      */
-    private func rangesForHashtags(textString: String) -> [[String : AnyObject]] {
+    fileprivate func rangesForHashtags(_ textString: String) -> [[String : AnyObject]] {
         
         var rangesForHashtags = [[String : AnyObject]]()
         
         do {
             // Setup a regular expression for user handles and hashtags
-            let regex = try NSRegularExpression(pattern: "(?<!\\w)#([\\w\\_]+)?", options: NSRegularExpressionOptions.CaseInsensitive)
+            let regex = try NSRegularExpression(pattern: "(?<!\\w)#([\\w\\_]+)?", options: NSRegularExpression.Options.caseInsensitive)
             
             // Run the expression and get matches
-            let matches = regex.matchesInString(textString, options: NSMatchingOptions.ReportProgress, range: NSMakeRange(0, (textString as NSString).length))
+            let matches = regex.matches(in: textString, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSMakeRange(0, (textString as NSString).length))
             
             // Add all our ranges to the result
             for match in matches {
                 let matchRange = match.range
-                let matchString = (textString as NSString).substringWithRange(matchRange)
+                let matchString = (textString as NSString).substring(with: matchRange)
                 
                 if !ignoreMatch(matchString) {
                     rangesForHashtags.append([
-                        kLabelLinkTypeKey : LWHyperLabelType.Hashtag.rawValue,
+                        kLabelLinkTypeKey : LWHyperLabelType.hashtag.rawValue as AnyObject,
                         kLabelRangeKey : NSValue(range: matchRange),
-                        kLabelLinkKey : matchString])
+                        kLabelLinkKey : matchString as AnyObject])
                 }
             }
             
@@ -552,14 +547,14 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      
      - returns: 带有超链接相关描述字典的数组 [[kLabelLinkTypeKey : xxx, kLabelRangeKey : xxx, kLabelLinkKey : xxx]]
      */
-    private func rangesForURLs(textString: NSAttributedString) -> [[String : AnyObject]] {
+    fileprivate func rangesForURLs(_ textString: NSAttributedString) -> [[String : AnyObject]] {
         
         var rangesForURLs = [[String : AnyObject]]()
         
         do {
-            let detector = try NSDataDetector(types: NSTextCheckingType.Link.rawValue)
+            let detector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
             let plainText = textString.string
-            let matches = detector.matchesInString(plainText, options: NSMatchingOptions.ReportProgress, range: NSMakeRange(0, textString.length))
+            let matches = detector.matches(in: plainText, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSMakeRange(0, textString.length))
             
             // Add a range entry for every url we found
             for match in matches {
@@ -567,18 +562,18 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
                 
                 // If there's a link embedded in the attributes, use that instead of the raw text
                 var realURL: String!
-                if let url = textString.attribute(NSLinkAttributeName, atIndex: matchRange.location, effectiveRange: nil) as? String {
+                if let url = textString.attribute(NSLinkAttributeName, at: matchRange.location, effectiveRange: nil) as? String {
                     realURL = url
                 } else {
-                    realURL = (plainText as NSString).substringWithRange(matchRange)
+                    realURL = (plainText as NSString).substring(with: matchRange)
                 }
                 
                 if !ignoreMatch(realURL) {
-                    if match.resultType == NSTextCheckingType.Link {
+                    if match.resultType == NSTextCheckingResult.CheckingType.link {
                         rangesForURLs.append([
-                            kLabelLinkTypeKey : LWHyperLabelType.URL.rawValue,
+                            kLabelLinkTypeKey : LWHyperLabelType.url.rawValue as AnyObject,
                             kLabelRangeKey : NSValue(range: matchRange),
-                            kLabelLinkKey : realURL])
+                            kLabelLinkKey : realURL as AnyObject])
                     }
                 }
             }
@@ -598,14 +593,14 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      
      - returns: 带有超链接相关描述字典的数组 [[kLabelLinkTypeKey : xxx, kLabelRangeKey : xxx, kLabelLinkKey : xxx]]
      */
-    private func rangesForPhone(textString: NSAttributedString) -> [[String : AnyObject]] {
+    fileprivate func rangesForPhone(_ textString: NSAttributedString) -> [[String : AnyObject]] {
         
         var rangesForPhone = [[String : AnyObject]]()
         
         do {
-            let detector = try NSDataDetector(types: NSTextCheckingType.PhoneNumber.rawValue)
+            let detector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.phoneNumber.rawValue)
             let plainText = textString.string
-            let matches = detector.matchesInString(plainText, options: NSMatchingOptions.ReportProgress, range: NSMakeRange(0, textString.length))
+            let matches = detector.matches(in: plainText, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSMakeRange(0, textString.length))
             
             // Add a range entry for every url we found
             for match in matches {
@@ -613,18 +608,18 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
                 
                 // If there's a link embedded in the attributes, use that instead of the raw text
                 var realURL: String!
-                if let url = textString.attribute(NSLinkAttributeName, atIndex: matchRange.location, effectiveRange: nil) as? String {
+                if let url = textString.attribute(NSLinkAttributeName, at: matchRange.location, effectiveRange: nil) as? String {
                     realURL = url
                 } else {
-                    realURL = (plainText as NSString).substringWithRange(matchRange)
+                    realURL = (plainText as NSString).substring(with: matchRange)
                 }
                 
                 if !ignoreMatch(realURL) {
-                    if match.resultType == NSTextCheckingType.PhoneNumber {
+                    if match.resultType == NSTextCheckingResult.CheckingType.phoneNumber {
                         rangesForPhone.append([
-                            kLabelLinkTypeKey : LWHyperLabelType.Phone.rawValue,
+                            kLabelLinkTypeKey : LWHyperLabelType.phone.rawValue as AnyObject,
                             kLabelRangeKey : NSValue(range: matchRange),
-                            kLabelLinkKey : realURL])
+                            kLabelLinkKey : realURL as AnyObject])
                     }
                 }
             }
@@ -644,14 +639,14 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      
      - returns: 带有超链接相关描述字典的数组 [[kLabelLinkTypeKey : xxx, kLabelRangeKey : xxx, kLabelLinkKey : xxx]]
      */
-    private func rangesForAddress(textString: NSAttributedString) -> [[String : AnyObject]] {
+    fileprivate func rangesForAddress(_ textString: NSAttributedString) -> [[String : AnyObject]] {
         
         var rangesForAddress = [[String : AnyObject]]()
         
         do {
-            let detector = try NSDataDetector(types: NSTextCheckingType.Address.rawValue)
+            let detector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.address.rawValue)
             let plainText = textString.string
-            let matches = detector.matchesInString(plainText, options: NSMatchingOptions.ReportProgress, range: NSMakeRange(0, textString.length))
+            let matches = detector.matches(in: plainText, options: NSRegularExpression.MatchingOptions.reportProgress, range: NSMakeRange(0, textString.length))
             
             // Add a range entry for every url we found
             for match in matches {
@@ -659,18 +654,18 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
                 
                 // If there's a link embedded in the attributes, use that instead of the raw text
                 var realURL: String!
-                if let url = textString.attribute(NSLinkAttributeName, atIndex: matchRange.location, effectiveRange: nil) as? String {
+                if let url = textString.attribute(NSLinkAttributeName, at: matchRange.location, effectiveRange: nil) as? String {
                     realURL = url
                 } else {
-                    realURL = (plainText as NSString).substringWithRange(matchRange)
+                    realURL = (plainText as NSString).substring(with: matchRange)
                 }
                 
                 if !ignoreMatch(realURL) {
-                    if match.resultType == NSTextCheckingType.Address {
+                    if match.resultType == NSTextCheckingResult.CheckingType.address {
                         rangesForAddress.append([
-                            kLabelLinkTypeKey : LWHyperLabelType.Address.rawValue,
+                            kLabelLinkTypeKey : LWHyperLabelType.address.rawValue as AnyObject,
                             kLabelRangeKey : NSValue(range: matchRange),
-                            kLabelLinkKey : realURL])
+                            kLabelLinkKey : realURL as AnyObject])
                     }
                 }
             }
@@ -685,10 +680,10 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     
     
     /**判断 string 中是否包含了 ignoredKeywords 中的字段*/
-    private func ignoreMatch(string: String) -> Bool {
+    fileprivate func ignoreMatch(_ string: String) -> Bool {
         if let keywords = ignoredKeywords {
-            print(string.lowercaseString)
-            return keywords.containsObject(string.lowercaseString)
+            print(string.lowercased())
+            return keywords.contains(string.lowercased())
         }
         return false
     }
@@ -700,7 +695,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
      - parameter string:     原字符串
      - parameter linkRanges: 带有超链接相关描述字典的数组 [[kLabelLinkTypeKey : xxx, kLabelRangeKey : xxx, kLabelLinkKey : xxx]]
      */
-    private func addLinkAttributesToAttributedString(string: NSAttributedString, linkRanges: [[String : AnyObject]]) -> NSAttributedString {
+    fileprivate func addLinkAttributesToAttributedString(_ string: NSAttributedString, linkRanges: [[String : AnyObject]]) -> NSAttributedString {
         
         let attributedString = NSMutableAttributedString(attributedString: string)
         
@@ -713,7 +708,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
                     attributedString.addAttributes(attributes, range: range)
                     
                     // Add an URL attribute f this is a URL
-                    if useSystemURLStyle && ((dict[kLabelLinkTypeKey] as? Int) == LWHyperLabelType.URL.rawValue) {
+                    if useSystemURLStyle && ((dict[kLabelLinkTypeKey] as? Int) == LWHyperLabelType.url.rawValue) {
                         // Add alink attribute using the stored link
                         if let realURL = dict[kLabelLinkKey] as? String {
                             attributedString.addAttribute(NSLinkAttributeName, value: realURL, range: range)
@@ -731,7 +726,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     // MARK: Layout and Rendering
     
     
-    override func textRectForBounds(bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {
+    override func textRect(forBounds bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {
         
         // Use our text container to calculate the bounds required. First save our current text container setup
         let savedTextContainerSize = textContainer.size
@@ -742,7 +737,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
         textContainer.maximumNumberOfLines = numberOfLines
         
         // Measure the text with the new state
-        var textBounds = layoutManager.usedRectForTextContainer(textContainer)
+        var textBounds = layoutManager.usedRect(for: textContainer)
         
         // Position the bounds and round up the size for good measure
         textBounds.origin = bounds.origin
@@ -763,17 +758,17 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     
-    override func drawTextInRect(rect: CGRect) {
+    override func drawText(in rect: CGRect) {
         // Don't call super implementation. Might want to uncomment this out when
         // debugging layout and rendering problems.
         
         // Calculate the offset of the text in the view
-        let glyphRange = layoutManager.glyphRangeForTextContainer(textContainer)
+        let glyphRange = layoutManager.glyphRange(for: textContainer)
         let glyphsPosition = calcGlyphsPositionInView()
         
         // Drawing code
-        layoutManager.drawBackgroundForGlyphRange(glyphRange, atPoint: glyphsPosition)
-        layoutManager.drawGlyphsForGlyphRange(glyphRange, atPoint: glyphsPosition)
+        layoutManager.drawBackground(forGlyphRange: glyphRange, at: glyphsPosition)
+        layoutManager.drawGlyphs(forGlyphRange: glyphRange, at: glyphsPosition)
         
     }
     
@@ -781,11 +776,11 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     /**
      计算字符串在视图中的偏移量
      */
-    private func calcGlyphsPositionInView() -> CGPoint {
+    fileprivate func calcGlyphsPositionInView() -> CGPoint {
         
-        var textOffset = CGPointZero
+        var textOffset = CGPoint.zero
         
-        var textBounds = layoutManager.usedRectForTextContainer(textContainer)
+        var textBounds = layoutManager.usedRect(for: textContainer)
         textBounds.size.width = ceil(textBounds.size.width)
         textBounds.size.height = ceil(textBounds.size.height)
         
@@ -809,37 +804,37 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     // MARK: Interactions
     
     
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
         isTouchMoved = false
         
         // Get the info for the touched link if there is one
-        if let touchLocation = touches.first?.locationInView(self) {
+        if let touchLocation = touches.first?.location(in: self) {
             if let touchedLink = linkAtPoint(touchLocation) {
                 if let range = touchedLink[kLabelRangeKey]?.rangeValue {
                     selectedRange = range
                 } else {
-                    super.touchesBegan(touches, withEvent: event)
+                    super.touchesBegan(touches, with: event)
                 }
             } else {
-                super.touchesBegan(touches, withEvent: event)
+                super.touchesBegan(touches, with: event)
             }
         } else {
-            super.touchesBegan(touches, withEvent: event)
+            super.touchesBegan(touches, with: event)
         }
         
     }
     
     
-    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        super.touchesMoved(touches, withEvent: event)
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesMoved(touches, with: event)
         
         isTouchMoved = true
     }
     
     
-    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        super.touchesEnded(touches, withEvent: event)
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
         
         // If the user dragged their finger we ignore the touch
         if isTouchMoved {
@@ -848,7 +843,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
         }
         
         // Get the info for the touched link if there is one
-        if let touchLocation = touches.first?.locationInView(self) {
+        if let touchLocation = touches.first?.location(in: self) {
             if let touchedLink = linkAtPoint(touchLocation) {
                 if let range = touchedLink[kLabelRangeKey]?.rangeValue {
                     let touchedSubstring = touchedLink[kLabelLinkKey] as! String
@@ -856,21 +851,21 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
                     
                     receivedActionForLinkType(linkType, string: touchedSubstring, range: range)
                 } else {
-                    super.touchesBegan(touches, withEvent: event)
+                    super.touchesBegan(touches, with: event)
                 }
             } else {
-                super.touchesBegan(touches, withEvent: event)
+                super.touchesBegan(touches, with: event)
             }
         } else {
-            super.touchesBegan(touches, withEvent: event)
+            super.touchesBegan(touches, with: event)
         }
         
         selectedRange = NSMakeRange(0, 0)
     }
     
     
-    override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
-        super.touchesCancelled(touches, withEvent: event)
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesCancelled(touches, with: event)
         
         // Make sure we don't leave a selection when the touch is cancelled
         selectedRange = NSMakeRange(0, 0)
@@ -879,24 +874,24 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     
     
     /**点击超链接回调*/
-    private func receivedActionForLinkType(linkType: LWHyperLabelType.RawValue, string: String, range: NSRange) {
+    fileprivate func receivedActionForLinkType(_ linkType: LWHyperLabelType.RawValue, string: String, range: NSRange) {
         
         switch linkType {
-        case LWHyperLabelType.UserHandle.rawValue:
+        case LWHyperLabelType.userHandle.rawValue:
             // 以"@"开头的用户名
-            userHandleLinkTapHandler?(label: self, string: string, range: range)
-        case LWHyperLabelType.Hashtag.rawValue:
+            userHandleLinkTapHandler?(self, string, range)
+        case LWHyperLabelType.hashtag.rawValue:
             // 以"#"开头标签
-            hashtagLinkTapHandler?(label: self, string: string, range: range)
-        case LWHyperLabelType.URL.rawValue:
+            hashtagLinkTapHandler?(self, string, range)
+        case LWHyperLabelType.url.rawValue:
             // http链接
-            urlLinkTapHandler?(label: self, string: string, range: range)
-        case LWHyperLabelType.Phone.rawValue:
+            urlLinkTapHandler?(self, string, range)
+        case LWHyperLabelType.phone.rawValue:
             // 电话链接
-            phoneLinkTapHandler?(label: self, string: string, range: range)
-        case LWHyperLabelType.Address.rawValue:
+            phoneLinkTapHandler?(self, string, range)
+        case LWHyperLabelType.address.rawValue:
             // 地址链接
-            addressLinkTapHandler?(label: self, string: string, range: range)
+            addressLinkTapHandler?(self, string, range)
         default: break
         }
         
@@ -906,18 +901,18 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     // MARK: Layout manager delegate
     
     
-    func layoutManager(layoutManager: NSLayoutManager, shouldBreakLineByWordBeforeCharacterAtIndex charIndex: Int) -> Bool {
+    func layoutManager(_ layoutManager: NSLayoutManager, shouldBreakLineByWordBeforeCharacterAt charIndex: Int) -> Bool {
         
         // Don't allow line breaks inside URLs
         var range: NSRange = NSMakeRange(0, 0)
-        if let _ = layoutManager.textStorage?.attribute(NSLinkAttributeName, atIndex: charIndex, effectiveRange: &range) as? NSURL {
+        if let _ = layoutManager.textStorage?.attribute(NSLinkAttributeName, at: charIndex, effectiveRange: &range) as? URL {
             return !((charIndex > range.location) && (charIndex <= NSMaxRange(range)))
         }
         return true
     }
     
     /**对attributedString中的 NSParagraphStyle 进行优化*/
-    class func sanitizeAttributedString(attributedString: NSAttributedString) -> NSAttributedString {
+    class func sanitizeAttributedString(_ attributedString: NSAttributedString) -> NSAttributedString {
         
         /*
          Setup paragraph alignement properly, IB applies the line break style
@@ -931,11 +926,11 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
         // IB only allows a single paragraph so getting the style of the first char is fine
         
         var range: NSRange = NSMakeRange(0, 0)
-        if let paragraphStyle = attributedString.attribute(NSParagraphStyleAttributeName, atIndex: 0, effectiveRange: &range) as? NSParagraphStyle {
+        if let paragraphStyle = attributedString.attribute(NSParagraphStyleAttributeName, at: 0, effectiveRange: &range) as? NSParagraphStyle {
             
             if let mutableParagraphStyle = paragraphStyle.mutableCopy() as? NSMutableParagraphStyle {
                 // Remove the line breaks
-                mutableParagraphStyle.lineBreakMode = NSLineBreakMode.ByWordWrapping
+                mutableParagraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
                 
                 // Apply new style
                 let restyled = NSMutableAttributedString(attributedString: attributedString)
@@ -956,7 +951,7 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     
     // MARK: Helper methods
     
-    private func forceRefresh() {
+    fileprivate func forceRefresh() {
         
         // Update our text store with an attributed string based on the original label text properties
         if let content = text {
@@ -972,27 +967,27 @@ class LWHyperLabel: UILabel, NSLayoutManagerDelegate {
     // MARK: - Public methods
     
     /**点击 LWHyperLabelTypeUserHandle 类型回调*/
-    func tapHandlerForUserHandleLink(handler: ((label: LWHyperLabel, string: String, range: NSRange) -> Void)?) {
+    func tapHandlerForUserHandleLink(_ handler: ((_ label: LWHyperLabel, _ string: String, _ range: NSRange) -> Void)?) {
         userHandleLinkTapHandler = handler
     }
     
     /**点击 LWHyperLabelTypeHashtag 类型回调*/
-    func tapHandlerForHashtagLink(handler: ((label: LWHyperLabel, string: String, range: NSRange) -> Void)?) {
+    func tapHandlerForHashtagLink(_ handler: ((_ label: LWHyperLabel, _ string: String, _ range: NSRange) -> Void)?) {
         hashtagLinkTapHandler = handler
     }
     
     /**点击 LWHyperLabelTypeURL 类型回调*/
-    func tapHandlerForURLLink(handler: ((label: LWHyperLabel, string: String, range: NSRange) -> Void)?) {
+    func tapHandlerForURLLink(_ handler: ((_ label: LWHyperLabel, _ string: String, _ range: NSRange) -> Void)?) {
         urlLinkTapHandler = handler
     }
     
     /**点击 LWHyperLabelTypePhone 类型回调*/
-    func tapHandlerForPhoneLink(handler: ((label: LWHyperLabel, string: String, range: NSRange) -> Void)?) {
+    func tapHandlerForPhoneLink(_ handler: ((_ label: LWHyperLabel, _ string: String, _ range: NSRange) -> Void)?) {
         phoneLinkTapHandler = handler
     }
     
     /**点击 LWHyperLabelTypeAddress 类型回调*/
-    func tapHandlerForAddressLink(handler: ((label: LWHyperLabel, string: String, range: NSRange) -> Void)?) {
+    func tapHandlerForAddressLink(_ handler: ((_ label: LWHyperLabel, _ string: String, _ range: NSRange) -> Void)?) {
         addressLinkTapHandler = handler
     }
     
